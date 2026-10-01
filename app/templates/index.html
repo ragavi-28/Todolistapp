@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TaskFlow | Productivity Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', path='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">✓</div>
+            <div>
+                <h2>TaskFlow</h2>
+                <span>Productivity Hub</span>
+            </div>
+        </div>
+
+        <nav class="navigation">
+
+            <a href="/" class="nav-item active">
+                <span>📋</span>
+                <span>My Tasks</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>⭐</span>
+                <span>Important</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>📅</span>
+                <span>Today</span>
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>✅</span>
+                <span>Completed</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="quote">
+                <span>💡</span>
+                <p>
+                    Small steps every day
+                    lead to big results.
+                </p>
+            </div>
+
+            {% if user %}
+            <div class="user-box">
+
+                <div class="avatar">
+                    {{ user.username[0]|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>{{ user.username }}</strong>
+                    <small>Active now</small>
+                </div>
+
+                <form action="/logout" method="post">
+                    <button class="logout-btn" title="Logout">
+                        ↪
+                    </button>
+                </form>
+
+            </div>
+            {% endif %}
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main">
+
+        <!-- HEADER -->
+
+        <header class="top-header">
+
+            <div>
+                <p class="greeting">Good afternoon 👋</p>
+
+                {% if user %}
+                <h1>
+                    Welcome back,
+                    <span>{{ user.username }}</span>
+                </h1>
+                {% else %}
+                <h1>Let's get things done.</h1>
+                {% endif %}
+
+                <p class="subtitle">
+                    Organize your work. Focus on what matters.
+                </p>
+            </div>
+
+            <div class="header-actions">
+
+                <button class="icon-btn">
+                    🔔
+                    <span class="notification-dot"></span>
+                </button>
+
+                <button class="profile-circle">
+                    {% if user %}
+                        {{ user.username[0]|upper }}
+                    {% else %}
+                        U
+                    {% endif %}
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= STATISTICS ================= -->
+
+        <section class="stats">
+
+            <div class="stat-card purple">
+
+                <div class="stat-icon">📋</div>
+
+                <div>
+                    <span>Total Tasks</span>
+                    <h2>{{ tasks|length }}</h2>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card orange">
+
+                <div class="stat-icon">🔥</div>
+
+                <div>
+                    <span>In Progress</span>
+                    <h2>{{ tasks|length }}</h2>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card green">
+
+                <div class="stat-icon">✓</div>
+
+                <div>
+                    <span>Completed</span>
+                    <h2>0</h2>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card blue">
+
+                <div class="stat-icon">⚡</div>
+
+                <div>
+                    <span>Productivity</span>
+                    <h2>85%</h2>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= PROGRESS ================= -->
+
+        <section class="progress-card">
+
+            <div class="progress-header">
+
+                <div>
+                    <span class="small-title">TODAY'S PROGRESS</span>
+
+                    <h2>
+                        Keep the momentum going 🚀
+                    </h2>
+                </div>
+
+                <strong>85%</strong>
+
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+
+            <p>
+                You're doing great! Keep completing your tasks.
+            </p>
+
+        </section>
+
+
+        <!-- ================= TASK HEADER ================= -->
+
+        <section class="task-section">
+
+            <div class="task-header">
+
+                <div>
+                    <h2>My Tasks</h2>
+                    <p>Manage your daily responsibilities</p>
+                </div>
+
+                <a href="/tasks/create" class="add-btn">
+                    <span>+</span>
+                    Add New Task
+                </a>
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div class="toolbar">
+
+                <div class="search-box">
+
+                    <span>🔍</span>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search your tasks..."
+                    >
+
+                </div>
+
+
+                <div class="filters">
+
+                    <button class="filter active">
+                        All
+                    </button>
+
+                    <button class="filter">
+                        Pending
+                    </button>
+
+                    <button class="filter">
+                        Completed
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= TASK LIST ================= -->
+
+            <div class="task-list" id="taskList">
+
+                {% if tasks %}
+
+                    {% for task in tasks %}
+
+                    <article class="task-card">
+
+                        <div class="task-check">
+                            <input
+                                type="checkbox"
+                                id="task{{ task.id }}"
+                            >
+
+                            <label for="task{{ task.id }}"></label>
+                        </div>
+
+
+                        <div class="task-content">
+
+                            <div class="task-title-row">
+
+                                <h3 class="task-title">
+                                    {{ task.title }}
+                                </h3>
+
+                                <span class="priority medium">
+                                    MEDIUM
+                                </span>
+
+                            </div>
+
+
+                            {% if task.description %}
+
+                            <p class="task-description">
+                                {{ task.description }}
+                            </p>
+
+                            {% else %}
+
+                            <p class="task-description empty">
+                                No description added.
+                            </p>
+
+                            {% endif %}
+
+
+                            <div class="task-meta">
+
+                                <span>
+                                    📅 Today
+                                </span>
+
+                                <span>
+                                    ⏱ Pending
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="task-actions">
+
+                            <a
+                                href="/tasks/edit/{{ task.id }}"
+                                class="action edit"
+                                title="Edit task">
+                                ✏️
+                            </a>
+
+                            <form
+                                action="/tasks/delete/{{ task.id }}"
+                                method="post"
+                                onsubmit="return confirm('Delete this task?');">
+
+                                <button
+                                    type="submit"
+                                    class="action delete"
+                                    title="Delete task">
+                                    🗑️
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </article>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            ✨
+                        </div>
+
+                        <h3>No tasks yet</h3>
+
+                        <p>
+                            Your productivity journey starts here.
+                            Create your first task!
+                        </p>
+
+                        <a href="/tasks/create" class="add-btn">
+                            + Create Your First Task
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ================= SEARCH SCRIPT ================= -->
+
+<script>
+
+const searchInput = document.getElementById("searchInput");
+
+if (searchInput) {
+
+    searchInput.addEventListener("input", function () {
+
+        const searchValue =
+            this.value.toLowerCase();
+
+        const tasks =
+            document.querySelectorAll(".task-card");
+
+        tasks.forEach(task => {
+
+            const title =
+                task.querySelector(".task-title")
+                    ?.textContent
+                    .toLowerCase() || "";
+
+            const description =
+                task.querySelector(".task-description")
+                    ?.textContent
+                    .toLowerCase() || "";
+
+            if (
+                title.includes(searchValue) ||
+                description.includes(searchValue)
+            ) {
+                task.style.display = "flex";
+            } else {
+                task.style.display = "none";
+            }
+
+        });
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
